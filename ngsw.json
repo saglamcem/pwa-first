@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1667574425852,
+  "timestamp": 1667574980619,
   "index": "/pwa-first/index.html",
   "assetGroups": [
     {
@@ -41,7 +41,22 @@
       "patterns": []
     }
   ],
-  "dataGroups": [],
+  "dataGroups": [
+    {
+      "name": "joke-api",
+      "patterns": [
+        "https:\\/\\/v2\\.jokeapi\\.dev\\/joke\\/.*"
+      ],
+      "strategy": "freshness",
+      "maxSize": 10,
+      "maxAge": 3600000,
+      "timeoutMs": 5000,
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "version": 2
+    }
+  ],
   "hashTable": {
     "/pwa-first/assets/icons/icon-128x128.png": "dae3b6ed49bdaf4327b92531d4b5b4a5d30c7532",
     "/pwa-first/assets/icons/icon-144x144.png": "b0bd89982e08f9bd2b642928f5391915b74799a7",
