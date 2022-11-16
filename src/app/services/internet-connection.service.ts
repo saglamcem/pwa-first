@@ -1,5 +1,16 @@
-import { Injectable, OnDestroy } from '@angular/core';
-import { filter, fromEvent, map, Observable, pairwise, ReplaySubject, Subscription, tap } from "rxjs";
+import { Inject, Injectable, OnDestroy } from '@angular/core';
+import {
+  distinctUntilChanged,
+  fromEvent,
+  map,
+  Observable,
+  Observer,
+  pairwise,
+  ReplaySubject,
+  Subscription,
+  tap
+} from "rxjs";
+import { DOCUMENT } from "@angular/common";
 
 export type ConnectionStatus = 'online' | 'offline'
 
@@ -25,28 +36,43 @@ export class InternetConnectionService implements OnDestroy {
 
   private readonly connectionStatusPair$: Observable<[ConnectionStatus, ConnectionStatus]> = this.connectionStatus$
     .pipe(
+      distinctUntilChanged(),
       pairwise(),
       tap(([f, s]) => console.log(`[connectionStatusPair$]: f: ${f}, s: ${s}`)),
+      tap(() => console.log('sending pair'))
     )
 
   readonly lostConnection$: Observable<boolean> = this.connectionStatusPair$
     .pipe(
       map(([f, s]) => f === 'online' && s === 'offline'),
-      filter(v => v)
+      tap(() => console.log('lostConnection$'))
     )
 
   readonly reconnected$: Observable<boolean> = this.connectionStatusPair$
     .pipe(
       map(([f, s]) => f === 'offline' && s === 'online'),
-      filter(v => v)
-    )
+      tap(() => console.log('reconnected$'))
+    );
 
-  constructor() {
-    const onlineEventsSub = this.onlineEvent$.subscribe(console.log)
-    const offlineEventsSub = this.offlineEvent$.subscribe(console.log)
+  startListening(): void {
+    const observer: Observer<any> = {
+      next: value => console.log(value),
+      error: err => console.error(err),
+      complete: () => console.log('completed')
+    }
+    const onlineEventsSub = this.onlineEvent$.subscribe({...observer})
+    const offlineEventsSub = this.offlineEvent$.subscribe({...observer})
+    const connectionStatus: ConnectionStatus = navigator.onLine
+      ? 'online'
+      : 'offline';
+
+    this.connectionStatus$.next(connectionStatus);
 
     this.subSink.add(onlineEventsSub)
     this.subSink.add(offlineEventsSub)
+  }
+
+  constructor(@Inject(DOCUMENT) private readonly document: Document) {
   }
 
   ngOnDestroy(): void {

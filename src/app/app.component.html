@@ -8,7 +8,8 @@
 <!--  </div>-->
 <!--</ng-container>-->
 
-<ng-container *ngIf="lostConnection$ | async">
+<ng-container *ngIf="lostConnection$ | async as value">
+  {{ value }}
   <div
     class="connectivity-bar"
     [ngClass]="'offline'">
