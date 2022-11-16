@@ -7,10 +7,11 @@ import { Joke } from "../model/joke";
   providedIn: 'root'
 })
 export class JokeService {
-  constructor(private readonly http: HttpClient) { }
+  constructor(private readonly http: HttpClient) {
+  }
 
   getJoke(): Observable<Joke> {
-    return this.http.get<Joke>('https://v2.jokeapi.dev/joke/Dark')
+    return this.http.get<Joke>('https://v2.jokeapi.dev/joke/Pun')
       .pipe();
   }
 }

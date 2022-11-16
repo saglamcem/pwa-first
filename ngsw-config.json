@@ -26,5 +26,20 @@
         ]
       }
     }
+  ],
+  "dataGroups": [
+    {
+      "urls": [
+        "https://v2.jokeapi.dev/joke/**"
+      ],
+      "name": "joke-api",
+      "version": 2,
+      "cacheConfig": {
+        "maxAge": "1h",
+        "timeout": "5s",
+        "strategy": "freshness",
+        "maxSize": 10
+      }
+    }
   ]
 }
