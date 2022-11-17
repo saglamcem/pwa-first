@@ -1,4 +1,4 @@
-import { Inject, Injectable, OnDestroy } from '@angular/core';
+import {Inject, Injectable, OnDestroy} from '@angular/core';
 import {
   distinctUntilChanged,
   fromEvent,
@@ -10,7 +10,7 @@ import {
   Subscription,
   tap
 } from "rxjs";
-import { DOCUMENT } from "@angular/common";
+import {DOCUMENT} from "@angular/common";
 
 export type ConnectionStatus = 'online' | 'offline'
 
@@ -42,15 +42,15 @@ export class InternetConnectionService implements OnDestroy {
       tap(() => console.log('sending pair'))
     )
 
-  readonly lostConnection$: Observable<boolean> = this.connectionStatusPair$
+  readonly lostConnection$: Observable<{ value: boolean }> = this.connectionStatusPair$
     .pipe(
-      map(([f, s]) => f === 'online' && s === 'offline'),
+      map(([f, s]) => ({value: f === 'online' && s === 'offline'})),
       tap(() => console.log('lostConnection$'))
     )
 
-  readonly reconnected$: Observable<boolean> = this.connectionStatusPair$
+  readonly reconnected$: Observable<{ value: boolean }> = this.connectionStatusPair$
     .pipe(
-      map(([f, s]) => f === 'offline' && s === 'online'),
+      map(([f, s]) => ({value: f === 'offline' && s === 'online'})),
       tap(() => console.log('reconnected$'))
     );
 

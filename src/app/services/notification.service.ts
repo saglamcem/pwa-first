@@ -6,7 +6,7 @@ export class NotificationService {
   constructor(@Inject(WINDOW) private readonly window: Window) {
   }
 
-  async requestPermissionIfNeeded() {
+  async requestPermissionIfNeeded(): Promise<boolean> {
     if ('Notification' in window) {
       // ask even if denied, solely for testing/debugging purposes
       // don't be annoying

@@ -1,11 +1,10 @@
 import {Component} from '@angular/core';
 import {JokeService} from "./services/joke.service";
-import {BehaviorSubject, Observable, tap} from "rxjs";
+import {delay, map, Observable, tap} from "rxjs";
 import {Joke} from "./model/joke";
 import {InternetConnectionService} from "./services/internet-connection.service";
 import {WakeLockService} from "./services/wake-lock.service";
 import {NotificationService} from "./services/notification.service";
-
 
 @Component({
   selector: 'app-root',
@@ -16,11 +15,28 @@ export class AppComponent {
   title = 'pwa-first';
   joke$: Observable<Joke> = this.joker.getJoke();
 
-  lostConnection$ = this.connection.lostConnection$;
+  reconnected$ = this.connection.reconnected$.pipe(
+    tap((val) => console.warn(`reconnected$: ${JSON.stringify(val, null, 2)}`)),
+    delay(5000),
+    map(() => ({value: false}))
+  )
 
-  displayConnectionBar$: BehaviorSubject<{ value: boolean }> = new BehaviorSubject<{ value: boolean }>({value: false});
-  displayConnectionBar$$: Observable<{ value: boolean }> = this.displayConnectionBar$.asObservable()
-    .pipe(tap((value) => console.log(`received ${JSON.stringify(value)}`)));
+  lostConnection$ = this.connection.lostConnection$.pipe(
+    tap((val) => console.warn(`lostConnection$: ${JSON.stringify(val, null, 2)}`))
+  )
+
+  // .pipe(
+  //   mapTo(true),
+  //   tap(() => console.log('before delay')),
+  //   delay(5000),
+  //   tap(() => console.log('after delay')),
+  //   mapTo(false)
+  // )
+  // .pipe(
+  //   delay(5000),
+  //   map(() => false)
+  // );
+
 
   constructor(
     private readonly joker: JokeService,
@@ -35,7 +51,7 @@ export class AppComponent {
     this.notifications.requestPermissionIfNeeded()
       .then(isAllowed => {
         if (isAllowed) {
-          const body = `You'll now be notified of changes 2!`;
+          const body = `You'll now be notified of changes!`;
           this.notifications.createNotification('Welcome!', {body});
         }
       });

@@ -1,25 +1,20 @@
-<!--<ng-container *ngIf="connectionStatus$ | async as status">-->
-<!--  <div style="height: 50px" *ngIf="displayConnectionBar$$ | async as display">-->
-<!--    <div-->
-<!--      class="connectivity-bar"-->
-<!--      [ngClass]="status">-->
-<!--      {{status === 'online' ? 'Back Online' : 'Check your connection' }}-->
-<!--    </div>-->
-<!--  </div>-->
-<!--</ng-container>-->
-
-<ng-container *ngIf="lostConnection$ | async as value">
-  {{ value }}
+<ng-container *ngIf="lostConnection$ | async as status">
   <div
+    *ngIf="status.value"
     class="connectivity-bar"
     [ngClass]="'offline'">
     Lost connection, retrying ...
   </div>
 </ng-container>
 
-<!--<ng-container *ngIf="reconnected$ | async as reconnected">-->
-<!--  {{ reconnected }}-->
-<!--</ng-container>-->
+<ng-container *ngIf="reconnected$ | async as status">
+  <div
+    *ngIf="status.value"
+    class="connectivity-bar"
+    [ngClass]="'online'">
+    Welcome back!
+  </div>
+</ng-container>
 
 <div class="joke-container">
   <ng-container *ngIf="wakeLockService.remainingWakeLockTimerCounter$ | async as remainingTimer">
