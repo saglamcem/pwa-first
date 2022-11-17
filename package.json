@@ -8,6 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "start-pwa": "ng build --configuration production && npx http-server -p 8080 -c-1 dist/pwa-first",
+    "start-server": "npx http-server -p 8080 -c-1 dist/pwa-first",
     "predeploy": "ng build --configuration production --base-href=/pwa-first/",
     "deploy": "npx gh-pages -d dist/pwa-first"
   },

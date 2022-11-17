@@ -30,7 +30,7 @@ export class NotificationService {
     }
   }
 
-  createNotification(title: string, options: NotificationOptions) {
+  createBasicNotification(title: string, options: NotificationOptions) {
     const notification = new Notification(title, {...options})
 
     console.log("notification")

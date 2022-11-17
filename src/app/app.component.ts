@@ -5,6 +5,7 @@ import {Joke} from "./model/joke";
 import {InternetConnectionService} from "./services/internet-connection.service";
 import {WakeLockService} from "./services/wake-lock.service";
 import {NotificationService} from "./services/notification.service";
+import {SwUpdate} from "@angular/service-worker";
 
 @Component({
   selector: 'app-root',
@@ -42,7 +43,8 @@ export class AppComponent {
     private readonly joker: JokeService,
     private readonly connection: InternetConnectionService,
     public readonly wakeLockService: WakeLockService,
-    private readonly notifications: NotificationService
+    private readonly notifications: NotificationService,
+    private readonly swUpdate: SwUpdate
   ) {
     this.wakeLockService.tryKeepScreenAliveForMinutes(3)
 
@@ -52,7 +54,17 @@ export class AppComponent {
       .then(isAllowed => {
         if (isAllowed) {
           const body = `You'll now be notified of changes!`;
-          this.notifications.createNotification('Welcome!', {body});
+          this.notifications.createBasicNotification('Welcome!', {body});
+
+          navigator.serviceWorker.ready.then((registration) => {
+            registration.showNotification("Vibration Sample", {
+              body: "Buzz! Buzz!",
+              icon: "../images/touch/chrome-touch-icon-192x192.png",
+              vibrate: [200, 100, 200, 100, 200, 100, 200],
+              tag: "vibration-sample",
+            });
+          });
+
         }
       });
   }
