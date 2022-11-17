@@ -18,8 +18,10 @@ interface WakeLockSentinel extends EventTarget {
   readonly released: boolean;
   /** The WakeLockSentinel's wake lock type. */
   readonly type: WakeLockType;
+
   /** Releases the WakeLockSentinel's lock on the screen. */
   release(): Promise<undefined>;
+
   /**
    * Called when the WakeLockSentinel's handle is released. Note that the
    * WakeLockSentinel's handle being released does not necessarily mean that
