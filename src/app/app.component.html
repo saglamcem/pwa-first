@@ -17,11 +17,19 @@
 </ng-container>
 
 <div class="joke-container">
+  <pre
+    style="width: 50vw; overflow-x: auto;"
+    *ngIf="notifications.subValues$ | async as values">
+    {{ values | json }}
+  </pre>
+
+  <div>Version: v{{version}}</div>
+
   <ng-container *ngIf="wakeLockService.remainingWakeLockTimerCounter$ | async as remainingTimer">
-    <p>Remaining: {{remainingTimer}}</p>
+    <p>Remaining seconds: {{remainingTimer}}</p>
   </ng-container>
 
-  <div class="image">
+  <div class="image" (click)="buzz()">
     <img
       width="300"
       alt="Angular Logo"
