@@ -1,8 +1,8 @@
-import { Inject, Injectable } from "@angular/core";
-import { WINDOW } from "../tokens/global";
-import { Observable, Subject, tap } from "rxjs";
-import { SwPush } from "@angular/service-worker";
-import { environment } from "../../environments/environment";
+import {Inject, Injectable} from "@angular/core";
+import {WINDOW} from "../tokens/global";
+import {Observable, Subject, tap} from "rxjs";
+import {SwPush} from "@angular/service-worker";
+import {environment} from "../../environments/environment";
 
 @Injectable({providedIn: 'root'})
 export class NotificationService {
@@ -31,7 +31,6 @@ export class NotificationService {
         console.error(err);
         return false;
       }
-
     }
     else {
       console.warn('Notifications are not supported by the client')
@@ -55,6 +54,7 @@ export class NotificationService {
       return;
     }
 
+    // for what should happen when user clicks a push notification bubble
     this.swPush.notificationClicks
       ?.pipe(
         tap(({notification, action}) => {
@@ -62,12 +62,17 @@ export class NotificationService {
           console.log(notification)
           console.log(action)
 
-          // fixme: failed to work on mobile, investigate
+          // for debugging:
+          // this.subValues$$.next({url: notification?.data?.url ?? 'value doesnt exist'})
+
+          // fixme: on mobile popup was blocked. gentle way to ask for popup/redirect permission?
+          // todo: investigate
           window.open(notification.data.url)
         })
       )
       .subscribe()
 
+    // for push notification messages
     this.swPush.messages
       ?.pipe(
         tap(val => {

@@ -1,12 +1,12 @@
-import { Component } from '@angular/core';
-import { JokeService } from "./services/joke.service";
-import { delay, map, Observable, tap } from "rxjs";
-import { Joke } from "./model/joke";
-import { InternetConnectionService } from "./services/internet-connection.service";
-import { WakeLockService } from "./services/wake-lock.service";
-import { NotificationService } from "./services/notification.service";
-import { SwPush, SwUpdate } from "@angular/service-worker";
-import { SwRelatedService } from "./services/sw-related.service";
+import {Component} from '@angular/core';
+import {JokeService} from "./services/joke.service";
+import {delay, map, Observable, tap} from "rxjs";
+import {Joke} from "./model/joke";
+import {InternetConnectionService} from "./services/internet-connection.service";
+import {WakeLockService} from "./services/wake-lock.service";
+import {NotificationService} from "./services/notification.service";
+import {SwPush, SwUpdate} from "@angular/service-worker";
+import {SwRelatedService} from "./services/sw-related.service";
 
 @Component({
   selector: 'app-root',
@@ -27,19 +27,7 @@ export class AppComponent {
     tap((val) => console.warn(`lostConnection$: ${JSON.stringify(val, null, 2)}`))
   )
 
-  // .pipe(
-  //   mapTo(true),
-  //   tap(() => console.log('before delay')),
-  //   delay(5000),
-  //   tap(() => console.log('after delay')),
-  //   mapTo(false)
-  // )
-  // .pipe(
-  //   delay(5000),
-  //   map(() => false)
-  // );
-
-  version: number = 7;
+  version: number = 9;
 
   constructor(
     private readonly joker: JokeService,

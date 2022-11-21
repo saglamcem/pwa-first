@@ -1,6 +1,6 @@
-import { Inject, Injectable } from "@angular/core";
-import { BehaviorSubject, Observable } from "rxjs";
-import { NAVIGATOR } from "../tokens/global";
+import {Inject, Injectable} from "@angular/core";
+import {BehaviorSubject, Observable} from "rxjs";
+import {NAVIGATOR} from "../tokens/global";
 
 @Injectable({providedIn: 'root'})
 export class WakeLockService {
@@ -16,7 +16,8 @@ export class WakeLockService {
   // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/dom-screen-wake-lock/dom-screen-wake-lock-tests.ts
   tryKeepScreenAliveForMinutes(minutes: number) {
     console.log(`requesting keep screen alive for ${minutes} minutes`)
-    navigator.wakeLock.request('screen')
+
+    this.requestWakeLock()
       .then(lock => {
         this.remainingWakeLockTimerCounter$$ = new BehaviorSubject<number>(minutes * 60);
         this.remainingWakeLockTimerCounter$ = this.remainingWakeLockTimerCounter$$.asObservable();
@@ -26,7 +27,7 @@ export class WakeLockService {
         }, 1000)
 
         const timeoutTimer = setTimeout(() => {
-          lock.release();
+          this.releaseWakeLock();
           clearInterval(intervalTimer);
           console.log('lock released');
           clearTimeout(timeoutTimer);
