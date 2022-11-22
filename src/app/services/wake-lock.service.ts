@@ -35,9 +35,7 @@ export class WakeLockService implements OnDestroy {
       startWith('visible'),
       tap((value) => console.log('*** visibilitychange ***')),
       map(() => document.visibilityState),
-      tap((value) => {
-        console.log(`%c${value}`, 'font-weight: bold; color: red;');
-      }),
+      tap((value) => console.log(`%c${value}`, 'font-weight: bold; color: red;')),
       distinctUntilChanged()
     )
 
@@ -105,7 +103,7 @@ export class WakeLockService implements OnDestroy {
         this.wakeLockSentinel = sentinel
       })
       .catch(err => {
-        this.wakeLockStatus$$?.next(`failed to get wakeLock:\n ${JSON.stringify(err, null, 2)}`)
+        this.wakeLockStatus$$?.next(`failed to get wakeLock:\n\n\n ${JSON.stringify(err, null, 2)}`)
         return;
       })
   }
