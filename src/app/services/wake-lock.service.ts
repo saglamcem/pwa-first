@@ -22,7 +22,7 @@ export class WakeLockService implements OnDestroy {
   private remainingWakeLockTimerCounter$$: BehaviorSubject<number> | undefined;
   remainingWakeLockTimerCounter$: Observable<number> | undefined;
 
-  private wakeLockSinceTimerCounter$$: BehaviorSubject<number> = new BehaviorSubject<number>(1);
+  private wakeLockSinceTimerCounter$$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   wakeLockSinceTimerCounter$: Observable<number> = this.wakeLockSinceTimerCounter$$.asObservable();
 
   private wakeLockStatus$$: BehaviorSubject<string> = new BehaviorSubject<string>(document.visibilityState);
@@ -47,14 +47,18 @@ export class WakeLockService implements OnDestroy {
     this.visibilityState$
       .pipe(
         switchMap(state => {
+          console.log(`visibility state is ${state}`)
+
           if (state === 'visible') {
             console.log(`%cstate: ${state} - requesting wake lock`, 'font-weight: bold; color: green;');
-            this.requestWakeLock()
+            return this.requestWakeLock()
               .then(lock => {
-                console.log('requested wake lock')
+                this.wakeLockSinceTimerCounter$$.next(1) // start timer for the ui
+                console.log('requested wake lock just before timer()')
                 return timer(0, 1000)
                   .pipe(
-                    tap((count) => this.wakeLockSinceTimerCounter$$.next(count + 1)),
+                    tap((count) => this.wakeLockSinceTimerCounter$$.next(count)),
+                    tap((count) => console.log('timer: ', count)),
                     takeWhile(() => document.visibilityState === 'visible')
                   );
               });
@@ -63,8 +67,9 @@ export class WakeLockService implements OnDestroy {
             this.releaseWakeLock();
             return EMPTY
           }
-        })
-      ).subscribe()
+        }),
+        switchMap((val) => val)
+      ).subscribe(console.warn)
   }
 
   // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/dom-screen-wake-lock/dom-screen-wake-lock-tests.ts
@@ -109,10 +114,11 @@ export class WakeLockService implements OnDestroy {
   }
 
   releaseWakeLock(): Promise<undefined | void> | undefined {
+    if (!this.wakeLockSentinel) console.error('no wake lock sentinel')
     return this.wakeLockSentinel?.release()
       .then(lock => {
         this.wakeLockStatus$$.next(`${document.visibilityState} - releasing wake lock`)
-        this.wakeLockSinceTimerCounter$$.next(1)
+        this.wakeLockSinceTimerCounter$$.next(0)
       })
       .catch(err => this.wakeLockStatus$$?.next(`error releasing wake lock: \n${JSON.stringify(err, null, 2)}`));
   }
