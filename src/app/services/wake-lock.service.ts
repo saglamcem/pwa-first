@@ -1,5 +1,18 @@
 import {Inject, Injectable, OnDestroy} from "@angular/core";
-import {BehaviorSubject, distinctUntilChanged, fromEvent, map, Observable, Subscription, tap} from "rxjs";
+import {
+  BehaviorSubject,
+  distinctUntilChanged,
+  EMPTY,
+  fromEvent,
+  map,
+  Observable,
+  startWith,
+  Subscription,
+  switchMap,
+  takeWhile,
+  tap,
+  timer
+} from "rxjs";
 import {NAVIGATOR} from "../tokens/global";
 
 @Injectable({providedIn: 'root'})
@@ -9,6 +22,9 @@ export class WakeLockService implements OnDestroy {
   private remainingWakeLockTimerCounter$$: BehaviorSubject<number> | undefined;
   remainingWakeLockTimerCounter$: Observable<number> | undefined;
 
+  private wakeLockSinceTimerCounter$$: BehaviorSubject<number> = new BehaviorSubject<number>(1);
+  wakeLockSinceTimerCounter$: Observable<number> = this.wakeLockSinceTimerCounter$$.asObservable();
+
   private wakeLockStatus$$: BehaviorSubject<string> = new BehaviorSubject<string>(document.visibilityState);
   wakeLockStatus$: Observable<string> = this.wakeLockStatus$$.asObservable();
 
@@ -16,6 +32,7 @@ export class WakeLockService implements OnDestroy {
 
   readonly visibilityState$: Observable<DocumentVisibilityState> = fromEvent(document, 'visibilitychange')
     .pipe(
+      startWith('visible'),
       tap((value) => console.log('*** visibilitychange ***')),
       map(() => document.visibilityState),
       tap((value) => {
@@ -29,22 +46,92 @@ export class WakeLockService implements OnDestroy {
   }
 
   enableWakeLockDependingOnVisibility(): void {
-    const visibilitySubscription = this.visibilityState$
+    this.visibilityState$
       .pipe(
-        tap(state => {
+        switchMap(state => {
           if (state === 'visible') {
             console.log(`%cstate: ${state} - requesting wake lock`, 'font-weight: bold; color: green;');
-            this.requestWakeLock();
+            this.requestWakeLock()
+              .then(lock => {
+                // this.wakeLockSinceTimerCounter$$ = new BehaviorSubject<number>(1);
+                console.log('requested wake lock')
+              });
+
+            return timer(0, 1000)
+              .pipe(
+                tap((count) => this.wakeLockSinceTimerCounter$$.next(count + 1)),
+                takeWhile(() => document.visibilityState === 'visible')
+              );
           }
           else {
-            console.log(`%cstate: ${state} - releasing wake lock`, 'font-weight: bold; color: purple;');
             this.releaseWakeLock();
+            return EMPTY
           }
         })
-      )
-      .subscribe();
+      ).subscribe()
+    //
+    // combineLatest([timer(0, 1000), this.visibilityState$])
+    //   .pipe(
+    //     tap(([seconds, visibilityState]: [number, DocumentVisibilityState]) => {
+    //       console.log(seconds)
+    //       if (visibilityState === 'visible') {
+    //         console.log(`%cstate: ${visibilityState} - requesting wake lock`, 'font-weight: bold; color: green;');
+    //         this.requestWakeLock()
+    //           .then(lock => {
+    //             // this.wakeLockSinceTimerCounter$$ = new BehaviorSubject<number>(1);
+    //             console.log('requested wake lock')
+    //
+    //             // setInterval(() => {
+    //             //   console.log(this.wakeLockSinceTimerCounter$$.value)
+    //             //   this.wakeLockSinceTimerCounter$$.next(this.wakeLockSinceTimerCounter$$.value + (1));
+    //             // }, 1000)
+    //           });
+    //       }
+    //       else {
+    //         console.log(`%cstate: ${visibilityState} - releasing wake lock`, 'font-weight: bold; color: purple;');
+    //         this.releaseWakeLock();
+    //       }
+    //
+    //     })
+    //   )
 
-    this.subSink.add(visibilitySubscription);
+
+    // timer(0, 1000)
+    //   .pipe(
+    //     tap(() => {
+    //       console.log(this.wakeLockSinceTimerCounter$$.value)
+    //       this.wakeLockSinceTimerCounter$$.next(this.wakeLockSinceTimerCounter$$.value + (1));
+    //     }),
+    //     repeatWhen()
+    //     takeWhile(() => this.visibilityState$.pipe())
+    //   )
+    //   .subscribe()
+
+    // const visibilitySubscription = this.visibilityState$
+    //   .pipe(
+    //     tap(state => {
+    //       if (state === 'visible') {
+    //         console.log(`%cstate: ${state} - requesting wake lock`, 'font-weight: bold; color: green;');
+    //         this.requestWakeLock()
+    //           .then(lock => {
+    //             // this.wakeLockSinceTimerCounter$$ = new BehaviorSubject<number>(1);
+    //             console.log('requested wake lock')
+    //
+    //             // setInterval(() => {
+    //             //   console.log(this.wakeLockSinceTimerCounter$$.value)
+    //             //   this.wakeLockSinceTimerCounter$$.next(this.wakeLockSinceTimerCounter$$.value + (1));
+    //             // }, 1000)
+    //           });
+    //       }
+    //       else {
+    //         console.log(`%cstate: ${state} - releasing wake lock`, 'font-weight: bold; color: purple;');
+    //         this.releaseWakeLock();
+    //       }
+    //     })
+    //   )
+    //   .subscribe();
+    //
+    // this.subSink.add(visibilitySubscription);
   }
 
   // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/dom-screen-wake-lock/dom-screen-wake-lock-tests.ts
@@ -70,25 +157,37 @@ export class WakeLockService implements OnDestroy {
       });
   }
 
-  requestWakeLock(): Promise<WakeLockSentinel> {
+  requestWakeLock(): Promise<WakeLockSentinel | void> {
     console.log('(requesting wake lock)')
-
-    this.wakeLockStatus$$?.next(`${document.visibilityState} - requesting wake lock`)
 
     if (this.wakeLockSentinel) {
       console.log('(returning existing sentinel)')
+      this.wakeLockStatus$$?.next(`${document.visibilityState} - using existing wakeLockSentinel for wake lock`)
+
       return Promise.resolve(this.wakeLockSentinel);
     }
 
     console.log('(returning actual request result sentinel)')
-    return navigator?.wakeLock?.request('screen').then(sentinel => this.wakeLockSentinel = sentinel)
+    return navigator?.wakeLock?.request('screen')
+      .then(sentinel => {
+        this.wakeLockStatus$$?.next(`${document.visibilityState} - received wakeLockSentinel for wake lock`)
+        this.wakeLockSentinel = sentinel
+      })
+      .catch(err => {
+        this.wakeLockStatus$$?.next(`failed to get wakeLock:\n ${JSON.stringify(err, null, 2)}`)
+        return;
+      })
   }
 
-  releaseWakeLock(): Promise<undefined> | undefined {
+  releaseWakeLock(): Promise<undefined | void> | undefined {
     console.log('(releasing wake lock)')
-    this.wakeLockStatus$$?.next(`${document.visibilityState} - releasing wake lock`)
 
-    return this.wakeLockSentinel?.release();
+    return this.wakeLockSentinel?.release()
+      .then(lock => {
+        this.wakeLockStatus$$?.next(`${document.visibilityState} - releasing wake lock`)
+        this.wakeLockSinceTimerCounter$$.next(1)
+      })
+      .catch(err => this.wakeLockStatus$$?.next(`error releasing wake lock: \n${JSON.stringify(err, null, 2)}`));
   }
 
   ngOnDestroy() {

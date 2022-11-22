@@ -33,6 +33,10 @@
     <p>Remaining seconds: {{remainingTimer}}</p>
   </ng-container>
 
+  <ng-container *ngIf="wakeLockService.wakeLockSinceTimerCounter$ | async as sinceTimer">
+    <p>Screen on wakeLock since {{sinceTimer}} seconds</p>
+  </ng-container>
+
   <div class="image" (click)="buzz()">
     <img
       width="300"

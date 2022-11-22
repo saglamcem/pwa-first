@@ -5,7 +5,6 @@ import {Joke} from "./model/joke";
 import {InternetConnectionService} from "./services/internet-connection.service";
 import {WakeLockService} from "./services/wake-lock.service";
 import {NotificationService} from "./services/notification.service";
-import {SwPush, SwUpdate} from "@angular/service-worker";
 import {SwRelatedService} from "./services/sw-related.service";
 
 @Component({
@@ -31,16 +30,14 @@ export class AppComponent {
     delay(2000)
   )
 
-  version: number = 9;
+  version: number = 19;
 
   constructor(
     private readonly joker: JokeService,
     private readonly connection: InternetConnectionService,
     public readonly wakeLockService: WakeLockService,
     public readonly notifications: NotificationService,
-    private readonly swUpdate: SwUpdate,
-    private readonly swPush: SwPush,
-    private readonly swRelatedServices: SwRelatedService
+    private readonly swRelatedServices: SwRelatedService // keep, here for DI purposes
   ) {
     // this.wakeLockService.tryKeepScreenAliveForMinutes(3)
 
@@ -72,7 +69,7 @@ export class AppComponent {
     //     }
     //   });
 
-    this.notifications.pushSubscription();
+    // this.notifications.pushSubscription();
   }
 
   buzz(): void {
