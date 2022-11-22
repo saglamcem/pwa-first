@@ -27,6 +27,10 @@ export class AppComponent {
     tap((val) => console.warn(`lostConnection$: ${JSON.stringify(val, null, 2)}`))
   )
 
+  wakeLockStatus$ = this.wakeLockService.wakeLockStatus$?.pipe(
+    delay(2000)
+  )
+
   version: number = 9;
 
   constructor(
@@ -38,7 +42,9 @@ export class AppComponent {
     private readonly swPush: SwPush,
     private readonly swRelatedServices: SwRelatedService
   ) {
-    this.wakeLockService.tryKeepScreenAliveForMinutes(3)
+    // this.wakeLockService.tryKeepScreenAliveForMinutes(3)
+
+    this.wakeLockService.enableWakeLockDependingOnVisibility();
 
     this.connection.startListening();
 

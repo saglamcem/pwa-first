@@ -7,7 +7,9 @@
   },
   "files": [
     "src/main.ts",
-    "src/polyfills.ts"
+    "src/polyfills.ts",
+    "src/app/typings/dom-screen-wake-lock.d.ts",
+    "src/app/typings/dom-screen-wake-lock.d.ts"
   ],
   "include": [
     "src/**/*.d.ts"

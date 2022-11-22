@@ -17,6 +17,10 @@
 </ng-container>
 
 <div class="joke-container">
+  <p *ngIf="wakeLockStatus$ | async as status">
+    {{status}}
+  </p>
+
   <pre
     style="width: 50vw; overflow-x: auto;"
     *ngIf="notifications.subValues$ | async as values">
