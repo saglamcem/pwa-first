@@ -102,6 +102,8 @@ export class WakeLockService implements OnDestroy {
       return Promise.resolve(this.wakeLockSentinel);
     }
 
+    if (!navigator || !navigator.wakeLock) this.wakeLockStatus$$.next(`wake lock isn't supported on this browser`)
+
     return navigator?.wakeLock?.request('screen')
       .then(sentinel => {
         this.wakeLockStatus$$.next(`${document.visibilityState} - received wakeLockSentinel for wake lock`)
