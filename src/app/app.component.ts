@@ -30,7 +30,7 @@ export class AppComponent {
     delay(2000)
   )
 
-  version: number = 25;
+  version: number = 26;
 
   constructor(
     private readonly joker: JokeService,
